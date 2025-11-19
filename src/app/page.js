@@ -1,65 +1,138 @@
-import Image from "next/image";
+// ========================================
+// HOMEPAGE
+// Main landing page with match carousels
+// ========================================
 
-export default function Home() {
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import HeroSection from '@/components/home/HeroSection';
+import MatchCarousel from '@/components/home/MatchCarousel';
+import FeaturesGrid from '@/components/home/FeaturesGrid';
+import { API_CONFIG } from '@/lib/utils/constants';
+
+async function getMatches() {
+  try {
+    // Fetch from first available worker
+    const workerUrl = API_CONFIG.WORKERS[0];
+    const response = await fetch(`${workerUrl}/api/matches`, {
+      next: { revalidate: 30 }, // Revalidate every 30 seconds
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch matches');
+    }
+    
+    const data = await response.json();
+    return data.matches || [];
+  } catch (error) {
+    console.error('Error fetching matches:', error);
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  const matches = await getMatches();
+  
+  // Categorize matches
+  const liveMatches = matches.filter(m => m.status === 'live');
+  const upcomingMatches = matches.filter(m => m.status === 'upcoming');
+  
+  // Featured match (first live or first upcoming)
+  const featuredMatch = liveMatches[0] || upcomingMatches[0] || null;
+  
+  // Sort upcoming by date
+  upcomingMatches.sort((a, b) => {
+    const dateA = new Date(`${a.match_date} ${a.match_time}`);
+    const dateB = new Date(`${b.match_date} ${b.match_time}`);
+    return dateA - dateB;
+  });
+  
+  // Separate today and later
+  const today = new Date().toISOString().split('T')[0];
+  const todayMatches = upcomingMatches.filter(m => m.match_date === today);
+  const laterMatches = upcomingMatches.filter(m => m.match_date > today);
+  
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <>
+      <Header />
+      
+      <main className="min-h-screen bg-background pt-16 sm:pt-20">
+        {/* Hero Section */}
+        <HeroSection featuredMatch={featuredMatch} />
+        
+        {/* Live Matches */}
+        {liveMatches.length > 0 && (
+          <section className="py-8">
+            <MatchCarousel 
+              title="🔴 Live Sekarang" 
+              matches={liveMatches}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          </section>
+        )}
+        
+        {/* Today's Matches */}
+        {todayMatches.length > 0 && (
+          <section className="py-8">
+            <MatchCarousel 
+              title="📅 Pertandingan Hari Ini" 
+              matches={todayMatches}
+            />
+          </section>
+        )}
+        
+        {/* Upcoming Matches */}
+        {laterMatches.length > 0 && (
+          <section className="py-8">
+            <MatchCarousel 
+              title="🔜 Segera Hadir" 
+              matches={laterMatches}
+            />
+          </section>
+        )}
+        
+        {/* No matches message */}
+        {matches.length === 0 && (
+          <section className="py-16">
+            <div className="container-custom text-center">
+              <div className="text-6xl mb-4">⚽</div>
+              <h2 className="text-2xl font-bold text-text-primary mb-2">
+                Belum Ada Pertandingan Tersedia
+              </h2>
+              <p className="text-text-secondary">
+                Segera hadir pertandingan menarik! Pantau terus TitikBola.
+              </p>
+            </div>
+          </section>
+        )}
+        
+        {/* Features Section */}
+        <FeaturesGrid />
+        
+        {/* CTA Section */}
+        <section className="py-16 bg-background-light">
+          <div className="container-custom text-center">
+            <h2 className="text-3xl font-bold text-text-primary mb-4">
+              Jangan Sampai Ketinggalan!
+            </h2>
+            <p className="text-text-secondary mb-8 max-w-2xl mx-auto">
+              Gabung channel Telegram kami untuk mendapatkan notifikasi pertandingan dan link streaming terbaru
+            </p>
+            <a 
+              href="https://t.me/titikbola_livesport"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 bg-accent-red hover:bg-accent-red-hover text-white font-bold px-8 py-4 rounded-lg text-lg transition-all duration-200 transform hover:scale-105"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+              </svg>
+              Gabung Telegram
+            </a>
+          </div>
+        </section>
       </main>
-    </div>
+      
+      <Footer />
+    </>
   );
 }

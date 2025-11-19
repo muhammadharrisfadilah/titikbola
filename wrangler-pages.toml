@@ -1,0 +1,36 @@
+# Cloudflare Pages Configuration
+# Place this in root of Next.js project
+
+name = "titikbola"
+compatibility_date = "2025-01-15"
+
+# Build configuration
+[build]
+command = "npm run build"
+cwd = "."
+watch_dir = "src"
+
+[build.upload]
+format = "service-worker"
+main = "./out"
+
+# Environment variables (sama dengan .env.local tapi untuk Pages)
+[env.production.vars]
+NEXT_PUBLIC_SITE_URL = "https://titikbola.pages.dev"
+NEXT_PUBLIC_WORKER_1_URL = "https://titikbola-proxy-1.your-account.workers.dev"
+NEXT_PUBLIC_WORKER_2_URL = "https://titikbola-proxy-2.your-account.workers.dev"
+NEXT_PUBLIC_WORKER_3_URL = "https://titikbola-proxy-3.your-account.workers.dev"
+NEXT_PUBLIC_WORKER_BACKUP_URL = "https://titikbola-proxy-backup.your-account.workers.dev"
+NEXT_PUBLIC_TOKEN_SECRET_KEY = "your-secret-key-here"
+NEXT_PUBLIC_MONETAG_ENABLED = "true"
+NEXT_PUBLIC_ADSTERRA_ENABLED = "true"
+NEXT_PUBLIC_P2P_ENABLED = "true"
+
+# Custom domains (optional)
+# [[route]]
+# pattern = "titikbola.com"
+# custom_domain = true
+
+# [[route]]
+# pattern = "www.titikbola.com"
+# custom_domain = true

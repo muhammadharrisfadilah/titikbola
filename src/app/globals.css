@@ -1,26 +1,218 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ========================================
+   GLOBAL STYLES - Netflix-inspired
+   ======================================== */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-text-primary antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Custom scrollbar (Netflix-style) */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-background-hover rounded-lg;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-text-muted;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Button styles */
+  .btn {
+    @apply px-6 py-3 rounded-md font-medium transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .btn-primary {
+    @apply btn bg-accent-red text-white;
+    @apply hover:bg-accent-red-hover;
+    @apply focus:ring-accent-red;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-background-light text-text-primary;
+    @apply hover:bg-background-hover;
+    @apply border border-text-muted;
+  }
+  
+  /* Card styles */
+  .card {
+    @apply bg-background-card rounded-lg p-6;
+    @apply shadow-card transition-shadow duration-300;
+  }
+  
+  .card-hover {
+    @apply card hover:shadow-card-hover;
+    @apply transform hover:scale-105 transition-transform duration-300;
+  }
+  
+  /* Match card (Netflix-style) */
+  .match-card {
+    @apply relative rounded-lg overflow-hidden;
+    @apply cursor-pointer transform transition-all duration-300;
+    @apply hover:scale-105 hover:z-10;
+  }
+  
+  /* Live indicator pulse */
+  .live-pulse {
+    @apply animate-pulse-slow;
+  }
+  
+  /* Loading spinner */
+  .spinner {
+    @apply animate-spin rounded-full border-4 border-text-muted;
+    @apply border-t-accent-red;
+    width: 48px;
+    height: 48px;
+  }
+  
+  /* Container */
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@layer utilities {
+  /* Text utilities */
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+  }
+  
+  /* Background gradients */
+  .bg-gradient-dark {
+    background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(20,20,20,1) 100%);
+  }
+  
+  /* Aspect ratios */
+  .aspect-video-16-9 {
+    aspect-ratio: 16 / 9;
+  }
+  
+  /* Truncate text */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+  
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+  
+  /* Glassmorphism */
+  .glass {
+    background: rgba(31, 31, 31, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ========================================
+   VIDEO PLAYER SPECIFIC STYLES
+   ======================================== */
+
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+video::-webkit-media-controls {
+  /* Customize video controls if needed */
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    to right,
+    #1a1a1a 4%,
+    #2a2a2a 25%,
+    #1a1a1a 36%
+  );
+  background-size: 1000px 100%;
+}
+
+/* ========================================
+   RESPONSIVE UTILITIES
+   ======================================== */
+
+@media (max-width: 640px) {
+  .container-custom {
+    @apply px-4;
+  }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
+@media print {
+  body {
+    @apply bg-white text-black;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
 }
