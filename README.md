@@ -1,2 +1,0 @@
-# titikbola
-titikbola
